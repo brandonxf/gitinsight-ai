@@ -106,6 +106,8 @@ def clone_repository(ref: RepoRef) -> CloneResult:
             dest,
             depth=1,
             single_branch=True,
+            # GitPython exige allow_unsafe_options para pasar `-c` explícitamente.
+            allow_unsafe_options=True,
             multi_options=[
                 "--no-tags",
                 "-c",

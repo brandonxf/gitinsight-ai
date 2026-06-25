@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Index, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import sqltypes
@@ -37,8 +37,12 @@ class AnalysisJob(UUIDMixin, TimestampMixin, Base):
     progress_pct: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     options: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
-    started_at: Mapped[datetime | None] = mapped_column(nullable=True)
-    finished_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     repository: Mapped[Repository] = relationship(back_populates="jobs")
     result: Mapped[AnalysisResult | None] = relationship(

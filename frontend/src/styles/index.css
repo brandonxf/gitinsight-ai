@@ -1,3 +1,67 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans antialiased text-slate-200 bg-ink-950;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Texto con degradado de marca */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(110deg, #8eb2ff 0%, #2f5dff 45%, #22d3ee 100%);
+  }
+
+  /* Tarjeta de cristal sobre fondo oscuro */
+  .glass {
+    @apply rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+  }
+  .glass-hover {
+    @apply transition-all duration-300 hover:border-electric-400/40 hover:bg-white/[0.07];
+  }
+
+  /* Botón primario de marca */
+  .btn-brand {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient
+      px-5 py-3 font-semibold text-white shadow-glow-sm transition-transform
+      duration-200 hover:scale-[1.03] active:scale-95 disabled:opacity-60
+      disabled:hover:scale-100;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/10
+      bg-white/5 px-3 py-1 text-sm font-medium text-slate-200;
+  }
+}
+
+/* Fondo de cuadrícula sutil */
+.bg-grid {
+  background-size: 44px 44px;
+  @apply bg-grid-dark;
+}
+
+/* Scrollbar a tono */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0b1124;
+}
+::-webkit-scrollbar-thumb {
+  background: #1d2747;
+  border-radius: 9999px;
+  border: 2px solid #0b1124;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2f5dff;
+}
