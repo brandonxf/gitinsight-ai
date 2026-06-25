@@ -1,0 +1,22 @@
+# Override de desarrollo: hot-reload y montaje de código fuente.
+# Docker Compose lo combina automáticamente con docker-compose.yml.
+services:
+  backend:
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+      - repos_cache:/data/repos_cache
+
+  worker:
+    command: watchfiles --filter python "celery -A app.workers.celery_app.celery worker --loglevel=INFO --queues=analysis,embeddings,maintenance --concurrency=2" /app
+    volumes:
+      - ./backend:/app
+      - repos_cache:/data/repos_cache
+
+  frontend:
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
