@@ -35,6 +35,18 @@ export interface TreeNode {
   children?: TreeNode[];
 }
 
+export interface Module {
+  name: string;
+  path: string;
+  responsibility: string;
+}
+
+export interface AiStatus {
+  available?: boolean;
+  model?: string;
+  error?: string;
+}
+
 export interface AnalysisResult {
   job: AnalysisJob;
   repository: Repository;
@@ -53,9 +65,13 @@ export interface AnalysisResult {
   };
   summary: string | null;
   purpose: string | null;
+  modules: Module[];
+  flow_description: string | null;
   risk_level: string | null;
   quality_score: number | null;
-  metrics: Record<string, any>;
+  metrics: Record<string, any> & { ai?: AiStatus };
+  diagrams: { architecture?: string; source?: string };
+  generated_docs: { readme?: string };
 }
 
 export type FindingCategory =

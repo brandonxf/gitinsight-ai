@@ -1,7 +1,8 @@
-"""Tarea raíz del pipeline de análisis (Fase 1, determinista).
+"""Tarea raíz del pipeline de análisis (deterministas + síntesis IA).
 
-Orquesta: clonado seguro -> analizadores -> persistencia, publicando progreso.
-Las fases comparten el repo en disco, por eso se ejecutan en un único worker.
+Orquesta: clonado seguro -> analizadores deterministas -> síntesis IA ->
+persistencia, publicando progreso. Las fases comparten el repo en disco, por eso
+se ejecutan en un único worker.
 """
 from __future__ import annotations
 
@@ -11,7 +12,13 @@ from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.analyzers import aggregate, applicable_analyzers, build_context
+from app.analyzers import (
+    aggregate,
+    applicable_analyzers,
+    applicable_synthesis,
+    build_context,
+    prepare_synthesis_context,
+)
 from app.core.logging import get_logger
 from app.models.analysis import AnalysisJob
 from app.repositories import analysis_repo, finding_repo
@@ -87,13 +94,13 @@ async def _run(sessionmaker: async_sessionmaker[AsyncSession], job_id: uuid.UUID
 
             context = await asyncio.to_thread(build_context, clone_result.path)
 
-            # Ejecuta analizadores uno a uno, actualizando progreso en la DB.
+            # Fase determinista: analizadores uno a uno (progreso 10..70).
             analyzers = applicable_analyzers(context)
             total = len(analyzers) or 1
             findings = []
             data: dict = {}
             for idx, analyzer in enumerate(analyzers):
-                pct = 10 + int((idx / total) * 80)
+                pct = 10 + int((idx / total) * 60)
                 await _set_progress(session, job, phase=analyzer.name, progress_pct=pct)
                 try:
                     result = await asyncio.to_thread(analyzer.run, context)
@@ -105,7 +112,22 @@ async def _run(sessionmaker: async_sessionmaker[AsyncSession], job_id: uuid.UUID
 
             data["aggregate"] = aggregate(findings, context)
 
-            await _set_progress(session, job, phase="persist", progress_pct=92)
+            # Fase de síntesis IA: depende de los datos agregados (progreso 72..90).
+            prepare_synthesis_context(context, data, findings)
+            synth = applicable_synthesis(context)
+            stotal = len(synth) or 1
+            for idx, analyzer in enumerate(synth):
+                pct = 72 + int((idx / stotal) * 18)
+                await _set_progress(session, job, phase=analyzer.name, progress_pct=pct)
+                try:
+                    result = await asyncio.to_thread(analyzer.run, context)
+                except Exception:  # noqa: BLE001
+                    logger.exception("analyze.synthesis_failed", extra={"a": analyzer.name})
+                    continue
+                data.update(result.data)
+                context.shared["synthesis"].update(result.data)
+
+            await _set_progress(session, job, phase="persist", progress_pct=94)
             await _persist(session, job_id, data, findings, clone_result)
 
             await _set_progress(
@@ -147,6 +169,12 @@ async def _persist(
         languages=data.get("languages", {}),
         frameworks=data.get("frameworks", []),
         structure=data.get("structure", {}),
+        summary=data.get("summary"),
+        purpose=data.get("purpose"),
+        modules=data.get("modules", []),
+        flow_description=data.get("flow_description"),
+        diagrams=data.get("diagrams", {}),
+        generated_docs=data.get("generated_docs", {}),
         risk_level=agg.get("risk_level"),
         quality_score=agg.get("quality_score"),
         metrics={
@@ -156,6 +184,7 @@ async def _persist(
             "security": data.get("security", {}),
             "secrets": data.get("secrets", {}),
             "package_managers": data.get("package_managers", []),
+            "ai": data.get("ai", {}),
             "clone": {
                 "commit_sha": clone_result.commit_sha,
                 "size_bytes": clone_result.size_bytes,

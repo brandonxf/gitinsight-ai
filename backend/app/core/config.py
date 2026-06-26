@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://ollama:11434/v1"
     llm_model: str = "qwen2.5-coder:3b"
     llm_api_key: str = ""
+    llm_enabled: bool = True
+    llm_timeout_seconds: int = 240
+    llm_max_retries: int = 2
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dim: int = 384
 

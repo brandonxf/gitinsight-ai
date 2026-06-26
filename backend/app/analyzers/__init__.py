@@ -7,6 +7,12 @@ from app.analyzers.pipeline import (
     applicable_analyzers,
     run_pipeline,
 )
+from app.analyzers.synthesis import (
+    SYNTHESIS_ANALYZERS,
+    applicable_synthesis,
+    prepare_synthesis_context,
+    run_synthesis,
+)
 
 __all__ = [
     "AnalysisContext",
@@ -18,4 +24,8 @@ __all__ = [
     "applicable_analyzers",
     "aggregate",
     "ANALYZERS",
+    "SYNTHESIS_ANALYZERS",
+    "applicable_synthesis",
+    "prepare_synthesis_context",
+    "run_synthesis",
 ]

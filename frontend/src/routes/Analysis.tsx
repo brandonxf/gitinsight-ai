@@ -5,14 +5,17 @@ import {
   ArrowRight,
   Bolt,
   Code,
+  FileText,
   Gauge,
   Github,
   Layers,
   Logo,
   Shield,
+  Sparkles,
 } from "../components/icons";
 import { Card, ProgressBar, RiskPill, ScoreRing } from "../components/ui";
 import { useFindings, useJobPolling, useResult } from "../features/analysis/hooks";
+import { DocsTab, InsightsTab } from "../features/analysis/insights";
 import { OverviewTab, QualityTab, SecurityTab } from "../features/analysis/tabs";
 
 const PHASES = [
@@ -23,13 +26,16 @@ const PHASES = [
   { key: "complexity", label: "Midiendo complejidad" },
   { key: "security_bandit", label: "Escaneando seguridad (Bandit)" },
   { key: "secret_scan", label: "Buscando secretos" },
+  { key: "explain", label: "Sintetizando con IA" },
+  { key: "diagrams", label: "Generando diagrama" },
+  { key: "docs_gen", label: "Redactando documentación" },
   { key: "persist", label: "Guardando resultados" },
 ];
 const PHASE_LABELS: Record<string, string> = Object.fromEntries(
   PHASES.map((p) => [p.key, p.label]).concat([["done", "Completado"], ["error", "Error"]]),
 );
 
-type Tab = "overview" | "quality" | "security";
+type Tab = "overview" | "insights" | "quality" | "security" | "docs";
 const SECURITY_CATS = ["secret", "vuln", "insecure_config"];
 
 export default function Analysis() {
@@ -170,18 +176,26 @@ export default function Analysis() {
                 <TabPill icon={<Layers className="h-4 w-4" />} active={tab === "overview"} onClick={() => setTab("overview")}>
                   Overview
                 </TabPill>
+                <TabPill icon={<Sparkles className="h-4 w-4" />} active={tab === "insights"} onClick={() => setTab("insights")}>
+                  Insights IA
+                </TabPill>
                 <TabPill icon={<Bolt className="h-4 w-4" />} active={tab === "quality"} onClick={() => setTab("quality")} count={qualityCount}>
                   Calidad
                 </TabPill>
                 <TabPill icon={<Shield className="h-4 w-4" />} active={tab === "security"} onClick={() => setTab("security")} count={securityCount} danger>
                   Seguridad
                 </TabPill>
+                <TabPill icon={<FileText className="h-4 w-4" />} active={tab === "docs"} onClick={() => setTab("docs")}>
+                  Docs
+                </TabPill>
               </div>
 
               <div className="animate-fade-up">
                 {tab === "overview" && <OverviewTab result={result.data} />}
+                {tab === "insights" && <InsightsTab result={result.data} />}
                 {tab === "quality" && <QualityTab findings={items} />}
                 {tab === "security" && <SecurityTab findings={items} />}
+                {tab === "docs" && <DocsTab result={result.data} />}
               </div>
             </div>
           )}
