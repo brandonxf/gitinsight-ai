@@ -25,8 +25,8 @@ const INJECTED_STYLES = `
   .bg-grid-theme {
       background-size: 60px 60px;
       background-image:
-          linear-gradient(to right, rgba(232,237,245,0.05) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(232,237,245,0.05) 1px, transparent 1px);
+          linear-gradient(to right, rgba(59,130,246,0.11) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(59,130,246,0.11) 1px, transparent 1px);
       mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
       -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
   }
@@ -47,6 +47,13 @@ const INJECTED_STYLES = `
       filter:
           drop-shadow(0px 10px 20px rgba(0,0,0,0.45))
           drop-shadow(0px 2px 4px rgba(0,0,0,0.35));
+  }
+
+  /* "no solo los commits": azul sólido, sin sombra. */
+  .text-blue-solid {
+      color: #3b82f6;
+      -webkit-text-fill-color: #3b82f6;
+      transform: translateZ(0);
   }
 
   .text-card-silver-matte {
@@ -309,7 +316,7 @@ export function CinematicHero({
         <h1 className="text-track gsap-reveal text-3d-matte font-display text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight mb-2">
           {tagline1}
         </h1>
-        <h1 className="text-days gsap-reveal text-silver-matte font-display text-5xl md:text-7xl lg:text-[6rem] font-extrabold tracking-tighter">
+        <h1 className="text-days gsap-reveal text-blue-solid font-display text-5xl md:text-7xl lg:text-[6rem] font-extrabold tracking-tighter">
           {tagline2}
         </h1>
       </div>

@@ -20,6 +20,7 @@ import {
 } from "../components/icons";
 import { CinematicHero } from "../components/CinematicHero";
 import { MouseScrollHint } from "../components/MouseScrollHint";
+import { Reveal } from "../components/Reveal";
 import { useStartAnalysis } from "../features/analysis/hooks";
 
 const SAMPLE_REPOS = [
@@ -74,7 +75,7 @@ export default function Home() {
 
       {/* ANALIZAR — destino del CTA del hero */}
       <section id="analizar" className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-3xl px-6 py-24 text-center lg:px-10">
+        <Reveal className="mx-auto max-w-3xl px-6 py-24 text-center lg:px-10">
           <p className="eyebrow justify-center"><span className="h-px w-7 bg-electric-500" />Analizar</p>
           <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Pega un repositorio y empieza.
@@ -126,13 +127,13 @@ export default function Home() {
               </button>
             ))}
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* EL INFORME — qué obtienes */}
       <section className="border-t border-white/[0.06] bg-ink-900/40">
         <div className="mx-auto max-w-7xl px-6 py-24 lg:px-10">
-          <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+          <Reveal className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <p className="eyebrow"><span className="h-px w-7 bg-electric-500" />El informe</p>
               <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -142,18 +143,18 @@ export default function Home() {
             <p className="max-w-xs text-sm text-slate-500">
               Cada pestaña del informe responde una pregunta distinta sobre el código.
             </p>
-          </div>
+          </Reveal>
           <div className="grid gap-px overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.06] md:grid-cols-2 lg:grid-cols-3">
-            {REPORT.map((r) => (
-              <div key={r.title} className="group bg-ink-850 p-7 transition-colors hover:bg-ink-800">
+            {REPORT.map((r, i) => (
+              <Reveal key={r.title} delay={i * 70} className="group bg-ink-850 p-7 transition-colors hover:bg-ink-800">
                 <div className="grid h-11 w-11 place-items-center rounded-lg border border-white/[0.08] bg-ink-900 text-electric-300 transition-colors group-hover:border-electric-500/40 group-hover:text-electric-200">
                   <r.icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-5 font-display text-lg font-semibold text-white">{r.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-400">{r.desc}</p>
-              </div>
+              </Reveal>
             ))}
-            <div className="flex flex-col justify-center bg-ink-850 p-7">
+            <Reveal delay={REPORT.length * 70} className="flex flex-col justify-center bg-ink-850 p-7">
               <p className="font-display text-lg font-semibold text-white">Todo en un solo enlace.</p>
               <p className="mt-2 text-sm text-slate-400">
                 Comparte el informe o vuelve a generarlo cuando el repo cambie.
@@ -161,7 +162,7 @@ export default function Home() {
               <a href="#analizar" className="mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-electric-300 hover:text-electric-200">
                 Probar ahora <ArrowRight className="h-3.5 w-3.5" />
               </a>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -169,7 +170,7 @@ export default function Home() {
       {/* CAPACIDADES */}
       <section id="capacidades" className="mx-auto max-w-7xl px-6 py-24 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="lg:sticky lg:top-16 lg:self-start">
+          <Reveal className="lg:sticky lg:top-16 lg:self-start">
             <p className="eyebrow"><span className="h-px w-7 bg-electric-500" />Capacidades</p>
             <h2 className="mt-5 font-display text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl">
               Lo que un linter, un parser y una regex resuelven, sin gastar un token.
@@ -183,11 +184,11 @@ export default function Home() {
               <ArrowRight className="h-4 w-4 text-slate-600" />
               <span className="chip-mono text-electric-300">ia</span>
             </div>
-          </div>
+          </Reveal>
 
           <div className="panel divide-y divide-white/[0.06] overflow-hidden">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="group flex items-start gap-5 p-6 transition-colors hover:bg-ink-800">
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.title} delay={i * 70} className="group flex items-start gap-5 p-6 transition-colors hover:bg-ink-800">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-white/[0.08] bg-ink-900 text-electric-300 transition-colors group-hover:border-electric-500/40 group-hover:text-electric-200">
                   <f.icon className="h-5 w-5" />
                 </div>
@@ -203,7 +204,7 @@ export default function Home() {
                   </div>
                   <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{f.desc}</p>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -212,7 +213,7 @@ export default function Home() {
       {/* PROCESO */}
       <section id="proceso" className="border-y border-white/[0.06] bg-ink-900/40">
         <div className="mx-auto max-w-7xl px-6 py-24 lg:px-10">
-          <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+          <Reveal className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <p className="eyebrow"><span className="h-px w-7 bg-electric-500" />Proceso</p>
               <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -222,17 +223,17 @@ export default function Home() {
             <p className="max-w-xs text-sm text-slate-500">
               Del enlace al informe sin registro, sin configuración y sin tarjeta.
             </p>
-          </div>
+          </Reveal>
           <div className="grid gap-px overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.06] md:grid-cols-3">
-            {STEPS.map((s) => (
-              <div key={s.n} className="bg-ink-850 p-8">
+            {STEPS.map((s, i) => (
+              <Reveal key={s.n} delay={i * 90} className="bg-ink-850 p-8">
                 <div className="flex items-baseline gap-3">
                   <span className="font-mono text-sm text-electric-400">{s.n}</span>
                   <span className="h-px flex-1 bg-white/[0.08]" />
                 </div>
                 <h3 className="mt-6 font-display text-lg font-semibold text-white">{s.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-400">{s.desc}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -241,7 +242,7 @@ export default function Home() {
       {/* STACK */}
       <section className="mx-auto max-w-7xl px-6 py-24 lg:px-10">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-          <div>
+          <Reveal>
             <p className="eyebrow"><span className="h-px w-7 bg-electric-500" />Stack</p>
             <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
               100% libre, de la API al modelo.
@@ -265,19 +266,19 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.06]">
             {[
               { icon: Code, label: "FastAPI + Celery", tag: "api · workers" },
               { icon: Layers, label: "PostgreSQL + pgvector", tag: "datos · vectores" },
               { icon: Lock, label: "Bandit + secretos", tag: "seguridad" },
               { icon: GitBranch, label: "React + Vite", tag: "frontend" },
-            ].map((it) => (
-              <div key={it.label} className="bg-ink-850 p-6">
+            ].map((it, i) => (
+              <Reveal key={it.label} delay={i * 70} className="bg-ink-850 p-6">
                 <it.icon className="h-5 w-5 text-electric-300" />
                 <div className="mt-4 font-display text-sm font-semibold text-white">{it.label}</div>
                 <div className="mt-1 font-mono text-[11px] text-slate-600">{it.tag}</div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
