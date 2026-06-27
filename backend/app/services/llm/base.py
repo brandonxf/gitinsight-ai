@@ -7,7 +7,7 @@ exponen una API compatible con la de OpenAI, por lo que un único cliente
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 
@@ -48,8 +48,13 @@ class LLMProvider(ABC):
         temperature: float = 0.2,
         max_tokens: int = 1024,
         json_mode: bool = False,
+        on_chunk: Callable[[str], None] | None = None,
     ) -> str:
-        """Devuelve el texto de la respuesta del asistente."""
+        """Devuelve el texto de la respuesta del asistente.
+
+        Si se pasa `on_chunk`, la respuesta se consume en streaming y el callback
+        recibe cada fragmento generado (para reportar progreso).
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -59,6 +64,7 @@ class LLMProvider(ABC):
         *,
         temperature: float = 0.2,
         max_tokens: int = 1024,
+        on_chunk: Callable[[str], None] | None = None,
     ) -> dict:
         """Como `chat`, pero parsea la respuesta como un objeto JSON."""
         raise NotImplementedError

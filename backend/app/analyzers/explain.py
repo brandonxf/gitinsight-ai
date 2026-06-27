@@ -5,7 +5,12 @@ resultado. Si el LLM no está disponible, degrada con elegancia (no rompe el job
 """
 from __future__ import annotations
 
-from app.analyzers.base import AnalysisContext, Analyzer, AnalyzerResult
+from app.analyzers.base import (
+    AnalysisContext,
+    Analyzer,
+    AnalyzerResult,
+    llm_token_sink,
+)
 from app.analyzers.evidence import build_evidence
 from app.core.config import settings
 from app.core.logging import get_logger
@@ -55,7 +60,12 @@ class ExplainAnalyzer(Analyzer):
             user(f"{_INSTRUCTIONS}\n\n# Evidencia\n{evidence}"),
         ]
         try:
-            obj = llm.chat_json(messages, max_tokens=850, temperature=0.2)
+            obj = llm.chat_json(
+                messages,
+                max_tokens=850,
+                temperature=0.2,
+                on_chunk=llm_token_sink(context, 320),
+            )
         except LLMError as exc:
             logger.warning("explain.llm_unavailable", extra={"error": str(exc)})
             return AnalyzerResult(

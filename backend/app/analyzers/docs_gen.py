@@ -5,7 +5,12 @@ calculada por `explain` (resumen, propósito, módulos) cuando está disponible.
 """
 from __future__ import annotations
 
-from app.analyzers.base import AnalysisContext, Analyzer, AnalyzerResult
+from app.analyzers.base import (
+    AnalysisContext,
+    Analyzer,
+    AnalyzerResult,
+    llm_token_sink,
+)
 from app.analyzers.evidence import build_evidence
 from app.core.config import settings
 from app.core.logging import get_logger
@@ -51,7 +56,7 @@ Reglas estrictas:
 - Empieza directamente con `# ` (el título). No incluyas las secciones de contexto
   anteriores (SÍNTESIS/EVIDENCIA) ni ningún texto antes del título.
 - No inventes instrucciones de instalación si no hay evidencia de ellas.
-- Máximo ~350 palabras. Devuelve SOLO el Markdown, sin envolverlo en ```.
+- Sé conciso: máximo ~220 palabras. Devuelve SOLO el Markdown, sin envolverlo en ```.
 """
 
 
@@ -72,7 +77,10 @@ class DocsGenAnalyzer(Analyzer):
 
         try:
             readme = get_llm().chat(
-                [system(_SYSTEM), user(prompt)], max_tokens=1100, temperature=0.3
+                [system(_SYSTEM), user(prompt)],
+                max_tokens=700,
+                temperature=0.3,
+                on_chunk=llm_token_sink(context, 420),
             )
         except LLMError as exc:
             logger.warning("docs_gen.llm_unavailable", extra={"error": str(exc)})

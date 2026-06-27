@@ -8,7 +8,12 @@ from __future__ import annotations
 
 import re
 
-from app.analyzers.base import AnalysisContext, Analyzer, AnalyzerResult
+from app.analyzers.base import (
+    AnalysisContext,
+    Analyzer,
+    AnalyzerResult,
+    llm_token_sink,
+)
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.services.llm import LLMError, get_llm, system, user
@@ -56,7 +61,7 @@ class DiagramsAnalyzer(Analyzer):
         mermaid = ""
         source = "fallback"
         if settings.llm_enabled:
-            mermaid = self._generate_with_llm(synthesis, structure)
+            mermaid = self._generate_with_llm(context, synthesis, structure)
             if mermaid:
                 source = "ai"
 
@@ -67,7 +72,9 @@ class DiagramsAnalyzer(Analyzer):
             data={"diagrams": {"architecture": mermaid, "source": source}}
         )
 
-    def _generate_with_llm(self, synthesis: dict, structure: dict) -> str:
+    def _generate_with_llm(
+        self, context: AnalysisContext, synthesis: dict, structure: dict
+    ) -> str:
         modules = synthesis.get("modules", []) or []
         modules_txt = "\n".join(
             f"- {m['name']} ({m.get('path', '')}): {m.get('responsibility', '')}"
@@ -77,7 +84,10 @@ class DiagramsAnalyzer(Analyzer):
         prompt = _PROMPT.format(modules=modules_txt, structure=struct_txt)
         try:
             raw = get_llm().chat(
-                [system(_SYSTEM), user(prompt)], max_tokens=700, temperature=0.1
+                [system(_SYSTEM), user(prompt)],
+                max_tokens=500,
+                temperature=0.1,
+                on_chunk=llm_token_sink(context, 200),
             )
         except LLMError as exc:
             logger.warning("diagrams.llm_unavailable", extra={"error": str(exc)})

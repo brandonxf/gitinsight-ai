@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 import httpx
 
@@ -41,6 +41,10 @@ class OpenAICompatLLM(LLMProvider):
             self._headers["Authorization"] = f"Bearer {api_key}"
         self._timeout = timeout
         self._max_retries = max(1, max_retries)
+        # En streaming el timeout se aplica por lectura (cada token), no al total:
+        # un modelo lento en CPU genera durante minutos sin disparar un timeout
+        # global, siempre que cada token llegue dentro del margen.
+        self._stream_timeout = httpx.Timeout(timeout, connect=10.0)
 
     def chat(
         self,
@@ -49,13 +53,14 @@ class OpenAICompatLLM(LLMProvider):
         temperature: float = 0.2,
         max_tokens: int = 1024,
         json_mode: bool = False,
+        on_chunk: Callable[[str], None] | None = None,
     ) -> str:
         payload: dict = {
             "model": self.model,
             "messages": [_trim(m).as_dict() for m in messages],
             "temperature": temperature,
             "max_tokens": max_tokens,
-            "stream": False,
+            "stream": on_chunk is not None,
         }
         if json_mode:
             payload["response_format"] = {"type": "json_object"}
@@ -63,6 +68,8 @@ class OpenAICompatLLM(LLMProvider):
         last_exc: Exception | None = None
         for attempt in range(1, self._max_retries + 1):
             try:
+                if on_chunk is not None:
+                    return self._chat_streaming(payload, on_chunk)
                 with httpx.Client(timeout=self._timeout) as client:
                     resp = client.post(self._url, headers=self._headers, json=payload)
                 resp.raise_for_status()
@@ -79,6 +86,17 @@ class OpenAICompatLLM(LLMProvider):
                     "llm.http_error",
                     extra={"attempt": attempt, "status": exc.response.status_code},
                 )
+            except httpx.TimeoutException as exc:
+                last_exc = exc
+                logger.warning(
+                    "llm.timeout",
+                    extra={"attempt": attempt, "streaming": on_chunk is not None},
+                )
+                # En streaming, reintentar implica re-procesar todo el prompt
+                # (prefill) otra vez: muy caro en CPU y suele volver a colgarse.
+                # Mejor fallar ya para que el job degrade con elegancia.
+                if on_chunk is not None:
+                    break
             except (httpx.HTTPError, KeyError, ValueError, IndexError) as exc:
                 last_exc = exc
                 logger.warning("llm.error", extra={"attempt": attempt, "error": str(exc)})
@@ -88,15 +106,43 @@ class OpenAICompatLLM(LLMProvider):
 
         raise LLMError(f"El LLM falló tras {self._max_retries} intentos: {last_exc}")
 
+    def _chat_streaming(self, payload: dict, on_chunk: Callable[[str], None]) -> str:
+        """Consume la respuesta en streaming (SSE) acumulando el texto completo.
+
+        Reporta cada fragmento vía `on_chunk` para que el worker pueda avanzar
+        el progreso. Un fallo en el callback nunca interrumpe la generación.
+        """
+        parts: list[str] = []
+        with httpx.Client(timeout=self._stream_timeout) as client:
+            with client.stream(
+                "POST", self._url, headers=self._headers, json=payload
+            ) as resp:
+                resp.raise_for_status()
+                for line in resp.iter_lines():
+                    piece = _sse_content(line)
+                    if not piece:
+                        continue
+                    parts.append(piece)
+                    try:
+                        on_chunk(piece)
+                    except Exception:  # noqa: BLE001 — el progreso no rompe la síntesis
+                        pass
+        return "".join(parts)
+
     def chat_json(
         self,
         messages: Sequence[ChatMessage],
         *,
         temperature: float = 0.2,
         max_tokens: int = 1024,
+        on_chunk: Callable[[str], None] | None = None,
     ) -> dict:
         raw = self.chat(
-            messages, temperature=temperature, max_tokens=max_tokens, json_mode=True
+            messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            json_mode=True,
+            on_chunk=on_chunk,
         )
         return _parse_json(raw)
 
@@ -106,6 +152,20 @@ class OpenAICompatLLM(LLMProvider):
             return True
         except LLMError:
             return False
+
+
+def _sse_content(line: str) -> str | None:
+    """Extrae el delta de texto de una línea SSE `data: {...}` (OpenAI-compat)."""
+    if not line or not line.startswith("data:"):
+        return None
+    data = line[len("data:") :].strip()
+    if not data or data == "[DONE]":
+        return None
+    try:
+        obj = json.loads(data)
+        return obj["choices"][0]["delta"].get("content") or None
+    except (json.JSONDecodeError, KeyError, IndexError, AttributeError):
+        return None
 
 
 def _trim(message: ChatMessage) -> ChatMessage:

@@ -8,6 +8,7 @@ from __future__ import annotations
 import shutil
 import sys
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -133,6 +134,31 @@ class AnalysisContext:
 
     def files_for_language(self, language: str) -> list[SourceFile]:
         return [f for f in self.files if f.language == language]
+
+
+#: Clave en `context.shared` donde se publica el progreso de generación del LLM.
+#: El worker la lee para avanzar la barra durante las fases de IA (que de otro
+#: modo se quedarían congeladas mientras el modelo genera token a token).
+LLM_TOKEN_KEY = "_llm_tok"
+
+
+def llm_token_sink(context: AnalysisContext, expected: int) -> Callable[[str], None]:
+    """Crea un callback `on_chunk` para `LLMProvider.chat` que reporta progreso.
+
+    Cada fragmento recibido del stream incrementa el contador de tokens en
+    `context.shared[LLM_TOKEN_KEY]`. Si no hay contador (uso standalone/tests),
+    el callback es inofensivo. El progreso nunca debe romper la generación.
+    """
+    tok = context.shared.get(LLM_TOKEN_KEY)
+    if tok is not None:
+        tok["expected"] = max(int(expected), 1)
+        tok["produced"] = 0
+
+    def _on_chunk(piece: str) -> None:
+        if tok is not None and piece:
+            tok["produced"] = tok.get("produced", 0) + 1
+
+    return _on_chunk
 
 
 class Analyzer(ABC):
