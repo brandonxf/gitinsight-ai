@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     llm_enabled: bool = True
     llm_timeout_seconds: int = 240
     llm_max_retries: int = 2
+    # Si una fase de síntesis IA pasa este nº de segundos sin emitir tokens
+    # nuevos, se considera colgada: se cancela y el job degrada con elegancia
+    # (continúa sin esa pieza de IA en vez de quedarse congelado).
+    llm_stall_seconds: int = 150
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dim: int = 384
 
