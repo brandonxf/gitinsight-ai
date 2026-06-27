@@ -1,35 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import {
   Activity,
   ArrowRight,
+  Boxes,
+  Check,
   Code,
+  Diagram,
   FileText,
   Gauge,
+  GitBranch,
   Github,
   Layers,
+  Lock,
   Logo,
   Shield,
   Sparkles,
 } from "../components/icons";
-import { ProgressBar, RiskPill, ScoreRing } from "../components/ui";
+import type { JobStatus } from "../features/analysis/api";
+import { RiskPill, ScoreRing } from "../components/ui";
 import { useFindings, useJobPolling, useResult } from "../features/analysis/hooks";
 import { DocsTab, InsightsTab } from "../features/analysis/insights";
 import { OverviewTab, QualityTab, SecurityTab } from "../features/analysis/tabs";
 
 const PHASES = [
-  { key: "clone", label: "Clonando repositorio" },
-  { key: "tech_detect", label: "Detectando tecnologías" },
-  { key: "structure", label: "Analizando estructura" },
-  { key: "quality_ruff", label: "Evaluando calidad (Ruff)" },
-  { key: "complexity", label: "Midiendo complejidad" },
-  { key: "security_bandit", label: "Escaneando seguridad (Bandit)" },
-  { key: "secret_scan", label: "Buscando secretos" },
-  { key: "explain", label: "Sintetizando con IA" },
-  { key: "diagrams", label: "Generando diagrama" },
-  { key: "docs_gen", label: "Redactando documentación" },
-  { key: "persist", label: "Guardando resultados" },
+  { key: "clone", label: "Clonando repositorio", icon: GitBranch },
+  { key: "tech_detect", label: "Detectando tecnologías", icon: Layers },
+  { key: "structure", label: "Analizando estructura", icon: Boxes },
+  { key: "quality_ruff", label: "Evaluando calidad (Ruff)", icon: Gauge },
+  { key: "complexity", label: "Midiendo complejidad", icon: Activity },
+  { key: "security_bandit", label: "Escaneando seguridad (Bandit)", icon: Shield },
+  { key: "secret_scan", label: "Buscando secretos", icon: Lock },
+  { key: "explain", label: "Sintetizando con IA", icon: Sparkles },
+  { key: "diagrams", label: "Generando diagrama", icon: Diagram },
+  { key: "docs_gen", label: "Redactando documentación", icon: FileText },
+  { key: "persist", label: "Guardando resultados", icon: Check },
 ];
 const PHASE_LABELS: Record<string, string> = Object.fromEntries(
   PHASES.map((p) => [p.key, p.label]).concat([["done", "Completado"], ["error", "Error"]]),
@@ -85,6 +91,8 @@ export default function Analysis() {
             phase={job.data.phase}
             pct={job.data.progress_pct}
             label={PHASE_LABELS[job.data.phase ?? ""] ?? "En cola"}
+            status={job.data.status}
+            startedAt={job.data.started_at ?? job.data.created_at}
           />
         )}
 
@@ -205,54 +213,183 @@ function scoreVerdict(score: number | null): string {
   return "Requiere atención";
 }
 
-function ProcessingCard({ phase, pct, label }: { phase: string | null; pct: number; label: string }) {
+function useElapsed(startIso?: string | null) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  if (!startIso) return "00:00";
+  const secs = Math.max(0, Math.floor((now - new Date(startIso).getTime()) / 1000));
+  const m = String(Math.floor(secs / 60)).padStart(2, "0");
+  const s = String(secs % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function ProcessingCard({
+  phase,
+  pct,
+  label,
+  status,
+  startedAt,
+}: {
+  phase: string | null;
+  pct: number;
+  label: string;
+  status: JobStatus;
+  startedAt?: string | null;
+}) {
+  const elapsed = useElapsed(startedAt);
+  const queued = status === "PENDING" || !phase;
+  const phaseIndex = PHASES.findIndex((p) => p.key === phase);
+  const doneCount = PHASES.filter((p) => isPast(p.key, phase, pct) && p.key !== phase).length;
+
   return (
-    <div className="panel overflow-hidden">
-      {/* cabecera de instrumento */}
-      <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-3.5">
+    <div className="animate-fade-up panel relative overflow-hidden">
+      {/* Retícula blueprint + barrido del escáner (firma del instrumento). */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-grid-blueprint opacity-70 [background-size:34px_34px]"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute inset-y-0 w-px animate-scan-sweep bg-gradient-to-b from-transparent via-electric-400/25 to-transparent shadow-[0_0_10px_1px_rgba(96,154,250,0.12)]"
+        aria-hidden="true"
+      />
+
+      {/* Cabecera de instrumento */}
+      <div className="relative flex items-center justify-between border-b border-white/[0.06] px-6 py-3.5">
         <div className="flex items-center gap-2.5 font-mono text-xs text-slate-400">
           <span className="h-1.5 w-1.5 rounded-full bg-aqua-500 animate-blink-soft" />
-          analizando
+          escaneando repositorio
         </div>
-        <span className="font-mono text-[11px] uppercase tracking-widest text-electric-400">en curso</span>
+        <div className="flex items-center gap-5 font-mono text-[11px] uppercase tracking-widest">
+          <span className="hidden text-slate-500 sm:inline">
+            elapsed <span className="tabular-nums text-electric-300">{elapsed}</span>
+          </span>
+          <span className="text-electric-400">{queued ? "en cola" : "en curso"}</span>
+        </div>
       </div>
 
-      <div className="p-6">
-        <div className="flex items-center gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-electric-500/30 text-electric-300">
-            <Activity className="h-6 w-6" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <span className="font-display font-semibold text-white">{label}</span>
-              <span className="font-mono text-sm text-electric-300">{pct}%</span>
+      <div className="relative grid items-center gap-8 p-6 lg:grid-cols-[auto_1fr] lg:gap-12 lg:p-8">
+        {/* Medidor radial */}
+        <div className="flex flex-col items-center gap-4 justify-self-center">
+          <ScanGauge pct={pct} />
+          <div className="text-center">
+            <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">
+              {queued ? "preparando" : `fase ${phaseIndex + 1} / ${PHASES.length}`}
             </div>
-            <div className="mt-2.5">
-              <ProgressBar value={pct} />
+            <div className="mt-1 font-display text-lg font-semibold text-white">{label}</div>
+            <div className="mt-0.5 font-mono text-[11px] text-slate-600">
+              {doneCount} de {PHASES.length} completadas
             </div>
           </div>
         </div>
 
-        {/* timeline de fases */}
-        <div className="mt-7 grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-11">
+        {/* Lista de fases */}
+        <div className="grid content-start gap-1.5 sm:grid-cols-2">
           {PHASES.map((p, i) => {
-            const reached = pct > 0 && (p.key === phase || isPast(p.key, phase, pct));
             const current = p.key === phase;
+            const done = isPast(p.key, phase, pct) && !current;
+            const Icon = p.icon;
             return (
-              <div key={p.key} className="flex flex-col items-center gap-1.5 text-center">
-                <span className="font-mono text-[10px] text-slate-600">{String(i + 1).padStart(2, "0")}</span>
-                <span
-                  className={`h-1.5 w-full rounded-full transition-colors ${
-                    current ? "bg-electric-400" : reached ? "bg-electric-600" : "bg-white/10"
-                  }`}
-                />
-                <span className={`font-mono text-[10px] leading-tight ${current ? "text-electric-300" : "text-slate-600"}`}>
-                  {p.label.split(" ")[0]}
+              <div
+                key={p.key}
+                className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
+                  current
+                    ? "border-electric-500/40 bg-electric-500/[0.08]"
+                    : done
+                      ? "border-white/[0.05] bg-white/[0.015]"
+                      : "border-transparent"
+                }`}
+              >
+                <span className="w-5 shrink-0 font-mono text-[10px] text-slate-600">
+                  {String(i + 1).padStart(2, "0")}
                 </span>
+                <span
+                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-md border transition-colors ${
+                    current
+                      ? "border-electric-400/50 bg-electric-500/10 text-electric-300"
+                      : done
+                        ? "border-emerald-400/30 bg-emerald-500/[0.06] text-emerald-400"
+                        : "border-white/10 text-slate-600"
+                  }`}
+                >
+                  {done ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Icon className={`h-4 w-4 ${current ? "animate-pulse" : ""}`} />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div
+                    className={`truncate text-sm ${
+                      current
+                        ? "font-medium text-white"
+                        : done
+                          ? "text-slate-300"
+                          : "text-slate-600"
+                    }`}
+                  >
+                    {p.label}
+                  </div>
+                  <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                    {current ? (
+                      <span className="bar-scan block h-full w-full rounded-full" />
+                    ) : (
+                      <span
+                        className={`block h-full origin-left rounded-full transition-all duration-700 ${
+                          done ? "w-full bg-emerald-500/60" : "w-0"
+                        }`}
+                      />
+                    )}
+                  </div>
+                </div>
+                {current && (
+                  <span className="shrink-0 font-mono text-[10px] tabular-nums text-electric-300">{pct}%</span>
+                )}
               </div>
             );
           })}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ScanGauge({ pct }: { pct: number }) {
+  const size = 176;
+  const stroke = 9;
+  const r = (size - stroke) / 2 - 7;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.min(100, Math.max(0, pct));
+  const offset = c - (clamped / 100) * c;
+  return (
+    <div className="relative grid place-items-center" style={{ width: size, height: size }}>
+      <div className="absolute inset-4 rounded-full bg-electric-500/10 blur-xl animate-blink-soft" aria-hidden="true" />
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.07)" strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="#609afa"
+          strokeWidth={stroke}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={offset}
+          style={{
+            transition: "stroke-dashoffset 0.7s cubic-bezier(0.16,1,0.3,1)",
+            filter: "drop-shadow(0 0 6px rgba(96,154,250,0.6))",
+          }}
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center">
+        <div className="font-display text-5xl font-extrabold tracking-tight text-white tabular-nums">
+          {clamped}
+          <span className="text-2xl text-electric-400">%</span>
+        </div>
+        <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500">completado</div>
       </div>
     </div>
   );
