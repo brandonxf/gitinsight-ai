@@ -1,0 +1,19 @@
+# Dirección del sitio:
+#   - Un dominio (p. ej. gitinsight.duckdns.org) => HTTPS automático con Let's Encrypt.
+#   - ":80" => solo HTTP (útil si aún no tienes dominio; usa la IP pública).
+# Se controla con la variable de entorno SITE_ADDRESS (ver .env.prod).
+{$SITE_ADDRESS::80} {
+	encode gzip zstd
+
+	# API REST + SSE (streaming de progreso/chat). Caddy hace flush por defecto.
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	# Frontend SPA: sirve los estáticos y cae a index.html para el router del cliente.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

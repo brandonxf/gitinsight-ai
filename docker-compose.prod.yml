@@ -1,0 +1,96 @@
+# Despliegue de producción (p. ej. VM Oracle Always Free ARM).
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# - LLM vía Groq free tier (configurado en .env.prod); sin Ollama.
+# - Solo Caddy publica puertos (80/443) con HTTPS automático. db/redis/backend
+#   quedan en la red interna, sin exponerse al exterior.
+# - Las imágenes se construyen en la propia VM, así que en ARM salen arm64.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gitinsight}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD en .env.prod}
+      POSTGRES_DB: ${POSTGRES_DB:-gitinsight}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gitinsight}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../infra/docker/backend.Dockerfile
+    restart: unless-stopped
+    env_file: .env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - repos_cache:/data/repos_cache
+    expose:
+      - "8000"
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: ../infra/docker/worker.Dockerfile
+    # concurrency=1: en un solo servidor evita duplicar el modelo de embeddings
+    # (onnxruntime) en RAM. Sube si tienes memoria de sobra.
+    command: celery -A app.workers.celery_app.celery worker --loglevel=INFO --queues=analysis,embeddings,maintenance --concurrency=1
+    restart: unless-stopped
+    env_file: .env.prod
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - repos_cache:/data/repos_cache
+
+  beat:
+    build:
+      context: ./backend
+      dockerfile: ../infra/docker/worker.Dockerfile
+    command: celery -A app.workers.celery_app.celery beat --loglevel=INFO
+    restart: unless-stopped
+    env_file: .env.prod
+    depends_on:
+      - redis
+
+  caddy:
+    build:
+      context: .
+      dockerfile: infra/docker/caddy.Dockerfile
+    restart: unless-stopped
+    env_file: .env.prod  # inyecta SITE_ADDRESS para el Caddyfile
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  postgres_data:
+  repos_cache:
+  caddy_data:
+  caddy_config:

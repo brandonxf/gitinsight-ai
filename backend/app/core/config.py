@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     llm_stall_seconds: int = 150
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dim: int = 384
+    # Hilos de onnxruntime para los embeddings. 0 = por defecto (1 por núcleo,
+    # consume mucha RAM en CPUs con muchos cores). En despliegue conviene 1-2.
+    embedding_threads: int = 0
 
     # RAG + Chat (Fase 3)
     rag_enabled: bool = True

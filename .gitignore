@@ -17,6 +17,7 @@ dist/
 # Env / secrets
 .env
 .env.local
+.env.prod
 *.local
 
 # Datos de runtime

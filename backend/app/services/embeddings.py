@@ -20,7 +20,11 @@ def _model():
     from fastembed import TextEmbedding
 
     logger.info("embeddings.load_model", extra={"model": settings.embedding_model})
-    return TextEmbedding(model_name=settings.embedding_model)
+    kwargs: dict = {}
+    if settings.embedding_threads > 0:
+        # Limita los hilos de onnxruntime para acotar RAM/CPU en despliegue.
+        kwargs["threads"] = settings.embedding_threads
+    return TextEmbedding(model_name=settings.embedding_model, **kwargs)
 
 
 def embed_documents(texts: Sequence[str]) -> list[list[float]]:
