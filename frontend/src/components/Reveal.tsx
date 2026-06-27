@@ -1,55 +1,39 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { motion, useInView } from "framer-motion";
 
 /**
- * Envuelve contenido para que aparezca con efecto "ghost" (fundido + leve
- * desenfoque y desplazamiento) cuando entra en el viewport al hacer scroll.
- * Usa IntersectionObserver y respeta prefers-reduced-motion.
+ * Aparición al hacer scroll, con el mismo estilo que el portafolio:
+ * fundido + desplazamiento hacia arriba (sin desenfoque), una sola vez,
+ * disparado por `useInView` con margen negativo para anticipar la entrada.
  */
 export function Reveal({
   children,
   className = "",
   delay = 0,
-  as: Tag = "div",
+  y = 40,
+  as = "div",
 }: {
   children: ReactNode;
   className?: string;
+  /** Retardo en milisegundos (para escalonar tarjetas). */
   delay?: number;
+  /** Desplazamiento vertical inicial en px. */
+  y?: number;
   as?: "div" | "section";
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setShown(true);
-      return;
-    }
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            setShown(true);
-            io.disconnect();
-          }
-        }
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const MotionTag = as === "section" ? motion.section : motion.div;
 
   return (
-    <Tag
+    <MotionTag
       ref={ref}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-      className={`reveal ${shown ? "reveal-in" : ""} ${className}`}
+      className={className}
+      initial={{ opacity: 0, y }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.8, delay: delay / 1000, ease: [0.25, 0.1, 0.25, 1] }}
     >
       {children}
-    </Tag>
+    </MotionTag>
   );
 }
