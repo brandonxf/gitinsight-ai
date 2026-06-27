@@ -183,6 +183,13 @@ export const Activity = (p: IconProps) => (
   </svg>
 );
 
+export const Mouse = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <rect x="6" y="3" width="12" height="18" rx="6" />
+    <path d="M12 7v3" />
+  </svg>
+);
+
 export const Boxes = (p: IconProps) => (
   <svg {...base} {...p}>
     <rect x="3" y="3" width="7" height="7" rx="1" />
