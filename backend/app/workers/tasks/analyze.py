@@ -25,7 +25,7 @@ from app.core.config import settings
 from app.core.logging import get_logger
 from app.models.analysis import AnalysisJob
 from app.repositories import analysis_repo, finding_repo
-from app.services import progress_service
+from app.services import progress_service, rag_service
 from app.services.clone_service import (
     CloneError,
     CloneResult,
@@ -198,6 +198,22 @@ async def _run(sessionmaker: async_sessionmaker[AsyncSession], job_id: uuid.UUID
                 data.update(result.data)
 
             data["aggregate"] = aggregate(findings, context)
+
+            # Fase de ingestión RAG (Fase 3): indexa el repo para el chat
+            # (chunk -> embeddings -> PgVector). Degrada con elegancia: si falla,
+            # el job continúa y solo se queda sin chat (progreso ~70).
+            if settings.rag_enabled:
+                await _set_progress(session, job, phase="ingest_rag", progress_pct=70)
+                try:
+                    n_chunks = await rag_service.ingest(session, job_id, context)
+                    await session.commit()
+                    logger.info(
+                        "analyze.rag_ingested",
+                        extra={"job_id": str(job_id), "chunks": n_chunks},
+                    )
+                except Exception:  # noqa: BLE001 — la indexación no debe tumbar el job
+                    await session.rollback()
+                    logger.exception("analyze.rag_failed", extra={"job_id": str(job_id)})
 
             # Fase de síntesis IA: depende de los datos agregados (progreso 72..93).
             prepare_synthesis_context(context, data, findings)

@@ -30,7 +30,7 @@ dependencies = [
     "bandit>=1.8",                # Fase 1: seguridad
     "radon>=6.0",                 # Fase 1: complejidad ciclomática
     # "tree-sitter>=0.23",        # V1: parseo multi-lenguaje
-    # "fastembed>=0.4",           # Fase 3: embeddings locales
+    "fastembed>=0.4",             # Fase 3: embeddings locales (ONNX en proceso)
 
     # Utilidades
     "watchfiles>=0.24",

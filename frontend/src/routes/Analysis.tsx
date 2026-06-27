@@ -5,6 +5,7 @@ import {
   Activity,
   ArrowRight,
   Boxes,
+  Chat,
   Check,
   Code,
   Diagram,
@@ -15,10 +16,12 @@ import {
   Layers,
   Lock,
   Logo,
+  Search,
   Shield,
   Sparkles,
 } from "../components/icons";
 import type { JobStatus } from "../features/analysis/api";
+import { ChatPanel } from "../features/chat/ChatPanel";
 import { RiskPill, ScoreRing } from "../components/ui";
 import { useFindings, useJobPolling, useResult } from "../features/analysis/hooks";
 import { DocsTab, InsightsTab } from "../features/analysis/insights";
@@ -32,6 +35,7 @@ const PHASES = [
   { key: "complexity", label: "Midiendo complejidad", icon: Activity },
   { key: "security_bandit", label: "Escaneando seguridad (Bandit)", icon: Shield },
   { key: "secret_scan", label: "Buscando secretos", icon: Lock },
+  { key: "ingest_rag", label: "Indexando código (RAG)", icon: Search },
   { key: "explain", label: "Sintetizando con IA", icon: Sparkles },
   { key: "diagrams", label: "Generando diagrama", icon: Diagram },
   { key: "docs_gen", label: "Redactando documentación", icon: FileText },
@@ -41,7 +45,7 @@ const PHASE_LABELS: Record<string, string> = Object.fromEntries(
   PHASES.map((p) => [p.key, p.label]).concat([["done", "Completado"], ["error", "Error"]]),
 );
 
-type Tab = "overview" | "insights" | "quality" | "security" | "docs";
+type Tab = "overview" | "insights" | "quality" | "security" | "docs" | "chat";
 const SECURITY_CATS = ["secret", "vuln", "insecure_config"];
 
 export default function Analysis() {
@@ -189,6 +193,9 @@ export default function Analysis() {
               <TabPill icon={<FileText className="h-4 w-4" />} active={tab === "docs"} onClick={() => setTab("docs")}>
                 Docs
               </TabPill>
+              <TabPill icon={<Chat className="h-4 w-4" />} active={tab === "chat"} onClick={() => setTab("chat")}>
+                Chat
+              </TabPill>
             </div>
 
             <div className="animate-fade-up">
@@ -197,6 +204,13 @@ export default function Analysis() {
               {tab === "quality" && <QualityTab findings={items} />}
               {tab === "security" && <SecurityTab findings={items} />}
               {tab === "docs" && <DocsTab result={result.data} />}
+              {tab === "chat" && (
+                <ChatPanel
+                  jobId={jobId}
+                  repoUrl={repo?.url}
+                  commitSha={repo?.commit_sha}
+                />
+              )}
             </div>
           </div>
         )}

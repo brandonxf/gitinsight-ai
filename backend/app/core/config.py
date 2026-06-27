@@ -38,6 +38,14 @@ class Settings(BaseSettings):
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dim: int = 384
 
+    # RAG + Chat (Fase 3)
+    rag_enabled: bool = True
+    rag_max_files: int = 400  # archivos máx. a indexar por repo (controla coste/tiempo)
+    rag_max_chunks: int = 1500  # tope duro de fragmentos por repo
+    rag_chunk_max_chars: int = 1600  # tamaño objetivo de cada fragmento
+    rag_top_k: int = 6  # fragmentos recuperados por pregunta
+    chat_max_tokens: int = 700  # tope de tokens de la respuesta del chat
+
     # Límites de clonado
     clone_max_size_mb: int = 500
     clone_max_files: int = 20000
