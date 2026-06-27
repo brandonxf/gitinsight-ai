@@ -13,7 +13,7 @@ const base = {
 
 export const Logo = (p: IconProps) => (
   <svg viewBox="0 0 32 32" {...p}>
-    <rect width="32" height="32" rx="8" fill="url(#lg)" />
+    <rect width="32" height="32" rx="8" fill="#2563eb" />
     <path
       d="M8 21l4.5-9 3.2 5.4L18 14l6 7"
       stroke="white"
@@ -22,12 +22,6 @@ export const Logo = (p: IconProps) => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <defs>
-      <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
-        <stop stopColor="#8385fb" />
-        <stop offset="1" stopColor="#5b5bd6" />
-      </linearGradient>
-    </defs>
   </svg>
 );
 

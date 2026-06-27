@@ -119,8 +119,7 @@ export default function Home() {
       <section id="top" ref={heroRef} className="relative overflow-hidden border-b border-white/[0.06]">
         {/* capas de fondo con parallax */}
         <div data-parallax="0.18" className="pointer-events-none absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_70%_60%_at_60%_30%,black,transparent)]" />
-        <div data-parallax="0.28" data-parallax-mouse="22" className="pointer-events-none absolute -top-40 left-[58%] h-[460px] w-[620px] rounded-full bg-electric-600/18 blur-[130px]" />
-        <div data-parallax="0.12" data-parallax-mouse="-32" className="pointer-events-none absolute right-[6%] top-44 h-64 w-64 rounded-full bg-aqua-500/12 blur-[120px]" />
+        <div data-parallax="0.24" data-parallax-mouse="20" className="pointer-events-none absolute -top-40 left-[58%] h-[440px] w-[600px] rounded-full bg-electric-700/10 blur-[140px]" />
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-6 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:px-10 lg:py-28">
           {/* columna izquierda: tesis */}

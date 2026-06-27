@@ -39,7 +39,7 @@ const LANG_COLORS: Record<string, string> = {
 };
 
 function langColor(lang: string): string {
-  return LANG_COLORS[lang] ?? "#5b5bd6";
+  return LANG_COLORS[lang] ?? "#3b82f6";
 }
 
 // ---------- OVERVIEW ----------

@@ -25,19 +25,13 @@ export function SectionTitle({ icon, children }: { icon?: ReactNode; children: R
   );
 }
 
-export function ProgressBar({ value, animated = true }: { value: number; animated?: boolean }) {
+export function ProgressBar({ value }: { value: number; animated?: boolean }) {
   return (
     <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-white/10">
       <div
-        className="h-full rounded-full bg-brand-gradient transition-all duration-700"
+        className="h-full rounded-full bg-electric-500 transition-all duration-700"
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
-      {animated && (
-        <div
-          className="absolute inset-y-0 left-0 w-1/3 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent"
-          style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
-        />
-      )}
     </div>
   );
 }
@@ -89,7 +83,7 @@ export function ScoreRing({ score, size = 132 }: { score: number | null; size?: 
   const r = (size - 16) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
-  const color = value >= 75 ? "#34d399" : value >= 45 ? "#8385fb" : "#ffb020";
+  const color = value >= 75 ? "#22c55e" : value >= 45 ? "#3b82f6" : "#f59e0b";
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">

@@ -11,25 +11,25 @@ export default {
         mono: ['"JetBrains Mono"', "ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {
-        // Marca: iris (azul-violeta confiado), usado SÓLIDO, no como glow.
+        // Marca: azul profesional sólido (sin degradados).
         electric: {
-          50: "#eef0ff",
-          100: "#e0e2ff",
-          200: "#c4c7ff",
-          300: "#a3a4ff",
-          400: "#8385fb",
-          500: "#5b5bd6", // primario
-          600: "#4f46c9",
-          700: "#4239a8",
-          800: "#362f86",
-          900: "#2c2a6b",
-          950: "#1b1942",
+          50: "#eff5ff",
+          100: "#dbe8fe",
+          200: "#bfd7fe",
+          300: "#93bbfd",
+          400: "#609afa",
+          500: "#3b82f6", // primario
+          600: "#2563eb",
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
+          950: "#172554",
         },
-        // Señal cálida (ámbar) para lecturas de datos y contraste cálido/frío.
+        // Acento secundario: misma familia azul (tono más claro), nunca un 2º color.
         aqua: {
-          400: "#ffc24b",
-          500: "#ffb020",
-          600: "#e69100",
+          400: "#609afa",
+          500: "#3b82f6",
+          600: "#2563eb",
         },
         // Lienzo grafito: casi negro neutro-frío, plano (sin brillo).
         ink: {
@@ -50,7 +50,6 @@ export default {
         // Retícula tipo plano técnico (blueprint).
         "grid-blueprint":
           "linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px)",
-        "brand-gradient": "linear-gradient(115deg, #8385fb 0%, #5b5bd6 45%, #ffb020 130%)",
       },
       keyframes: {
         "fade-up": {
