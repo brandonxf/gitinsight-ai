@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import type { AnalysisResult } from "./api";
 import { Card, SectionTitle } from "../../components/ui";
-import { Diagram, FileText, GitBranch, Layers, Sparkles } from "../../components/icons";
+import { Copy, Diagram, FileText, GitBranch, Layers, Sparkles } from "../../components/icons";
 import { MermaidRenderer } from "../diagrams/MermaidRenderer";
 import { Markdown } from "./markdown";
 
@@ -141,9 +141,9 @@ function CopyButton({ text }: { text: string }): ReactNode {
   return (
     <button
       onClick={() => navigator.clipboard?.writeText(text)}
-      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-xs font-medium text-slate-300 transition-colors hover:border-white/20 hover:bg-white/[0.06]"
     >
-      Copiar Markdown
+      <Copy className="h-3.5 w-3.5" /> Copiar Markdown
     </button>
   );
 }

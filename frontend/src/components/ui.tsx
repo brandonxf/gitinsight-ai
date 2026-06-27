@@ -18,7 +18,7 @@ export function Card({
 
 export function SectionTitle({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
   return (
-    <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-electric-300">
+    <h3 className="mb-4 flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-electric-300">
       {icon}
       {children}
     </h3>
@@ -76,8 +76,8 @@ export function RiskPill({ level }: { level: string | null }) {
   if (!level) return <span className="text-slate-500">—</span>;
   const s = RISK_STYLES[level] ?? RISK_STYLES.low;
   return (
-    <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${s.ring} ${s.text}`}>
-      <span className="h-2 w-2 rounded-full bg-current" />
+    <span className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-wide ${s.ring} ${s.text}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
       Riesgo {s.label}
     </span>
   );
@@ -89,7 +89,7 @@ export function ScoreRing({ score, size = 132 }: { score: number | null; size?: 
   const r = (size - 16) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
-  const color = value >= 75 ? "#22d3ee" : value >= 45 ? "#2f5dff" : "#f59e0b";
+  const color = value >= 75 ? "#34d399" : value >= 45 ? "#8385fb" : "#ffb020";
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">

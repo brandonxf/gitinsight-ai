@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { AnalysisResult, Finding, Severity } from "./api";
 import { Badge, Card, SectionTitle, SeverityBadge } from "../../components/ui";
-import { Code, GitBranch, Layers, Shield } from "../../components/icons";
+import { Code, File, Folder, GitBranch, Idea, Layers, Shield } from "../../components/icons";
 
 function bytesToHuman(bytes?: number): string {
   if (!bytes) return "—";
@@ -39,7 +39,7 @@ const LANG_COLORS: Record<string, string> = {
 };
 
 function langColor(lang: string): string {
-  return LANG_COLORS[lang] ?? "#2f5dff";
+  return LANG_COLORS[lang] ?? "#5b5bd6";
 }
 
 // ---------- OVERVIEW ----------
@@ -129,14 +129,24 @@ export function OverviewTab({ result }: { result: AnalysisResult }) {
         <ul className="max-h-72 space-y-1 overflow-auto pr-1 text-sm">
           {(structure.tree ?? []).map((node) => (
             <li key={node.name}>
-              <span className={node.type === "dir" ? "font-medium text-electric-200" : "text-slate-300"}>
-                {node.type === "dir" ? "📁" : "📄"} {node.name}
+              <span className={`flex items-center gap-1.5 ${node.type === "dir" ? "font-medium text-electric-200" : "text-slate-300"}`}>
+                {node.type === "dir" ? (
+                  <Folder className="h-3.5 w-3.5 shrink-0 text-electric-400" />
+                ) : (
+                  <File className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                )}
+                {node.name}
               </span>
               {node.children && node.children.length > 0 && (
                 <ul className="ml-5 mt-0.5 space-y-0.5 border-l border-white/5 pl-3 text-slate-400">
                   {node.children.slice(0, 14).map((child) => (
-                    <li key={child.name}>
-                      {child.type === "dir" ? "📁" : "📄"} {child.name}
+                    <li key={child.name} className="flex items-center gap-1.5">
+                      {child.type === "dir" ? (
+                        <Folder className="h-3.5 w-3.5 shrink-0 text-electric-400/70" />
+                      ) : (
+                        <File className="h-3.5 w-3.5 shrink-0 text-slate-600" />
+                      )}
+                      {child.name}
                     </li>
                   ))}
                 </ul>
@@ -260,7 +270,7 @@ function FindingCard({ f }: { f: Finding }) {
           <p className="text-sm text-slate-100">{f.message}</p>
           {f.suggestion && (
             <p className="mt-1.5 flex items-start gap-1.5 text-xs text-slate-400">
-              <span className="text-aqua-400">💡</span> {f.suggestion}
+              <Idea className="mt-0.5 h-3.5 w-3.5 shrink-0 text-aqua-400" /> {f.suggestion}
             </p>
           )}
         </div>

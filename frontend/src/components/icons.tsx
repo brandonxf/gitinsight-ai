@@ -24,8 +24,8 @@ export const Logo = (p: IconProps) => (
     />
     <defs>
       <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
-        <stop stopColor="#2f5dff" />
-        <stop offset="1" stopColor="#06b6d4" />
+        <stop stopColor="#8385fb" />
+        <stop offset="1" stopColor="#5b5bd6" />
       </linearGradient>
     </defs>
   </svg>
@@ -133,5 +133,67 @@ export const Check = (p: IconProps) => (
 export const Github = (p: IconProps) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...p}>
     <path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.36 1.12 2.94.86.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9v2.82c0 .27.18.59.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z" />
+  </svg>
+);
+
+export const Folder = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+  </svg>
+);
+
+export const File = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9l-6-6Z" />
+    <path d="M13 3v6h6" />
+  </svg>
+);
+
+export const Idea = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M9 18h6M10 21h4" />
+    <path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .9 1.6l.1.5h5l.1-.5c.1-.6.4-1.2.9-1.6A6 6 0 0 0 12 3Z" />
+  </svg>
+);
+
+export const Copy = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M5 15V5a2 2 0 0 1 2-2h8" />
+  </svg>
+);
+
+export const ArrowUpRight = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M7 17 17 7M8 7h9v9" />
+  </svg>
+);
+
+export const Terminal = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="m6 9 3 3-3 3M13 15h5" />
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+  </svg>
+);
+
+export const Scan = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" />
+    <path d="M4 12h16" />
+  </svg>
+);
+
+export const Activity = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M3 12h4l2.5-7 5 14L17 12h4" />
+  </svg>
+);
+
+export const Boxes = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
   </svg>
 );
